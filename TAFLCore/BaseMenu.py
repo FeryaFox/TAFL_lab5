@@ -2,24 +2,28 @@ import os
 
 
 class BaseMenu:
-    correct_linux_terminal: bool
+    __correct_linux_terminal: bool = None
 
     def __init__(self):
-        self.__check_is_correct_linux_terminal_environment()
+        self.check_is_correct_linux_terminal_environment()
 
-    def __check_is_correct_linux_terminal_environment(self) -> None:
+    @staticmethod
+    def check_is_correct_linux_terminal_environment() -> bool:
         if os.name != "posix" or "PYCHARM_HOSTED" in os.environ or "TERM" not in os.environ or os.environ["TERM"] == "":
-            self.correct_linux_terminal = False
+            return False
 
         try:
-            import simple_term_menu
-        except ModuleNotFoundError:
-            self.correct_linux_terminal = False
-
-        self.correct_linux_terminal = True
-
-        if self.correct_linux_terminal:
             from simple_term_menu import TerminalMenu
+        except ModuleNotFoundError:
+            return False
+
+        return True
+
+    @property
+    def correct_linux_terminal(self):
+        if self.__correct_linux_terminal is None:
+            self.__correct_linux_terminal = self.check_is_correct_linux_terminal_environment()
+        return self.__correct_linux_terminal
 
     def get_choose(self, choose: list, ignore_keyboard_interrupt: bool = False) -> int | None:
 

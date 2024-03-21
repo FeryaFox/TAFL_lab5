@@ -7,6 +7,10 @@ class TAFL5Saver(BaseSaver):
         super().__init__()
 
     @BaseSaver.load_decorator
+    def load_data(self) -> dict:
+        return self._data
+
+    @BaseSaver.load_decorator
     def load_alphabet_symbol(self) -> list[str] | None:
         try:
             return self._data["alphabet_symbol"]

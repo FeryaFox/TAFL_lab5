@@ -10,7 +10,7 @@ class BaseInputer:
             if not alphabet:
                 return None
 
-            if self._check_correct_alphabet():
+            if self._check_correct_alphabet(alphabet):
                 continue
             break
 

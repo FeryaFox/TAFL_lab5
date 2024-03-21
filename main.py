@@ -9,8 +9,18 @@ def main():
     menu = TAFL5Menu()
     inputer = TAFL5Inputer()
 
-    alphabet_symbol = saver.load_alphabet_symbol()
-    alphabet_graph = saver.load_alphabet_graph()
+    data_load = saver.load_data()
+
+    alphabet_symbol = []
+    alphabet_graph = []
+    input_automate = {}
+
+    if data_load == {}:
+        alphabet_symbol = inputer.load_alphabet_symbol()
+        alphabet_graph = inputer.load_alphabet_graph()
+        # input_automate = inputer
+    else:
+        ...
 
     if alphabet_symbol is not None:
         c = menu.new_load_alphabet_symbol_menu(alphabet_symbol)
