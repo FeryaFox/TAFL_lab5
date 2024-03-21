@@ -1,6 +1,7 @@
-from _ast import alias
 from dataclasses import dataclass
 from prettytable import PrettyTable
+from .TypedDict import *
+from .utils import AutomateUtils
 
 
 @dataclass
@@ -13,14 +14,20 @@ class State:
     def __contains__(self, item: list[str] | set[str] | str) -> bool:
         if isinstance(item, str):
             return item in self.value
-        return self.to_set().issubset(set(item))
+        return self.value.issubset(set(item))
+
+    def append(self, item: set[str] | str) -> None:
+        if isinstance(item, str):
+            self.value.add(item)
+        elif isinstance(item, set):
+            self.value += item
 
 
 @dataclass
 class TableState:
 
     state: State
-    alias: str | None = None
+    alias: str
     additional_info: str | None = None
 
     def __str__(self) -> str:
@@ -43,83 +50,99 @@ class TableState:
 @dataclass
 class AutomateRow:
     table_state: TableState
-    states: list[State] # stop here
-    __signals: list[str]
-    __state: State
-    value: dict[str, State]
+    signals: list[str]
+    states: list[State]
 
-    @property
-    def signals(self) -> list[str]:
-        return self.__signals
-
-    @signals.setter
-    def signals(self, value: list[str]) -> None:
-        if self.__signals is not None:
-            raise AttributeError("Сигнал уже было задано и не может быть изменено.")
-        self.__signals = value
-
-    @property
-    def state(self) -> str:
-        return self.__state
-
-    @state.setter
-    def state(self, value: str) -> None:
-        if self.__state is not None:
-            raise AttributeError("Состояние уже было задано и не может быть изменено.")
-        self.__state = value
+    def __getitem__(self, item: str) -> State:
+        return self.states[self.signals.index(item)]
 
     def __str__(self) -> str:
-        return f"{self.__state}: {self.value}"
+        table = PrettyTable()
+        table.field_names = [""] + self.signals
+        table.add_row(
+            [str(self.table_state)] + [self.states[_] for _ in self.states]
+        )
+        return str(table)
 
 
 class Automate:
     __signals: list[str]
-    __states: list[str]
-    __matrix: dict[str, dict[str, Cell]] = {}
+    __states: list[TableState]
+    __matrix: list[list[State]] = []
 
     def __init__(
             self,
-            states: list[str] | None = None,
+            states: list[TableState] | list[TableStateDict] | None = None,
             signals: list[str] | None = None,
-            a_dict: dict[str, dict[str, list[str]]] | None = None
+            automate_dict: AutomateDict | None = None
     ) -> None:
         if states is not None and signals is not None:
             self.__signals = signals
-            self.__states = states
+            if isinstance(states[0], TableState):
+                self.__states = states
+            elif isinstance(states[0], TableStateDict):
+                self.__states = [AutomateUtils.create_table_state_from_dict(_) for _ in states]
             self.__fill_clear_matrix()
-        elif a_dict is not None:
-            self.__states = [_ for _ in a_dict]
-            self.__signals = [_ for _ in a_dict[list(a_dict.keys())[0]]]
+        elif automate_dict is not None:
+            self.__states = [AutomateUtils.create_table_state_from_dict(_) for _ in automate_dict["table_states"]]
+            self.__signals = automate_dict["table_signals"]
             self.__fill_clear_matrix()
+
             for state in self.__states:
                 for signal in self.__signals:
-                    self.__setitem__((state, signal), a_dict[state][signal])
+                    self.__setitem__(
+                        (state.alias, signal),
+                        automate_dict["states"][self.__get_state_index_by_alias(state.alias)][self.__get_signal_index_by_name(signal)]
+                    )
+
+    def __get_state_index_by_alias(self, item: str) -> int:
+        index = 0
+        for state in self.__states:
+            if state.alias == item:
+                return index
+            index += 1
+
+    def __get_signal_index_by_name(self, name: str) -> int:
+        index = 0
+        for signal in self.__signals:
+            if signal == name:
+                return index
+            index += 1
 
     def __fill_clear_matrix(self):
         for state in self.__states:
+            row = []
             for signal in self.__signals:
-                self.__matrix[state] = {}
-                self.__matrix[state][signal] = Cell(state, signal, [])
+                row.append(State(set([])))
+            self.__matrix.append(row)
 
-    def __getitem__(self, item: str | tuple[str, str]) -> AutomateRow | Cell:
+    def __getitem__(self, item: str | tuple[str, str]) -> AutomateRow | State:
         if isinstance(item, tuple) and len(item) == 2:
             return self.__matrix[item[0]][item[1]]
         elif isinstance(item, str):
-            return AutomateRow(self.__signals, self.__states[self.__states.index(item)], self.__matrix[item])
+            c_state_alias = self.__get_state_index_by_alias(item[0])
+            return AutomateRow(
+                self.__states[c_state_alias],
+                self.__signals,
+                self.__matrix[self.__get_state_index_by_alias(item[0])]
+            )
         else:
             raise KeyError("Неверный индекс")
 
-    def __setitem__(self, item: tuple[str, str], value: list[str] | Cell) -> None:
+    def __setitem__(self, item: tuple[str, str], value: list[str] | State) -> None:
         if isinstance(item, tuple) and len(item) == 2:
-            if isinstance(value, Cell):
-                self.__matrix[item[0]][item[1]] = value
+            if isinstance(value, State):
+                self.__matrix[self.__get_state_index_by_alias(item[0])][self.__get_signal_index_by_name(item[1])] = value
             else:
-                if item[0] not in self.__states:
-                        raise KeyError("Попытка присвоить несуществующее состоянии")
+                for state in self.__states:
+                    if state == item[0]:
+                        break
+                else:
+                    raise KeyError("Попытка присвоить несуществующее состоянии")
                 if item[1] not in self.__signals:
                         raise KeyError("Попытка присвоить несуществующий сигнал")
                 for i in value:
-                    if i not in self.__states:
+                    if i not in self.__state: # stop here
                         raise KeyError("Попытка присвоить несуществующий сигнал")
                 self.__matrix[item[0]][item[1]] = Cell(item[0], item[1], value)
         else:
