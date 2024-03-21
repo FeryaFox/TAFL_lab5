@@ -1,7 +1,18 @@
 from dataclasses import dataclass
 from prettytable import PrettyTable
-from .TypedDict import *
-from .utils import AutomateUtils
+from typing import TypedDict
+
+
+class TableStateDict(TypedDict):
+    state: list[str]
+    alias: str
+    additional_info: str | None
+
+
+class AutomateDict(TypedDict):
+    table_states: list[TableStateDict]
+    table_signals: list[str]
+    states: list[list[list[str]]]
 
 
 @dataclass
@@ -9,7 +20,9 @@ class State:
     value: set[str]
 
     def __str__(self) -> str:
-        return f"{[", ".join(self.value)]}"
+        if len(self.value) == 0:
+            return "Ø"
+        return f"{", ".join(self.value)}"
 
     def __contains__(self, item: list[str] | set[str] | str) -> bool:
         if isinstance(item, str):
@@ -32,13 +45,13 @@ class TableState:
 
     def __str__(self) -> str:
         if self.alias is not None and self.additional_info is not None:
-            return f"{self.alias} = {self.additional_info} = {{ {str(self.state)} }}"
+            return f"{self.alias} = {self.additional_info} = {{ {", ".join(self.state.value)} }}"
         elif self.alias is None and self.additional_info is not None:
-            return f"{self.additional_info} = {{ {str(self.state)} }}"
+            return f"{self.additional_info} = {{ {", ".join(self.state.value)} }}"
         elif self.alias is not None and self.additional_info is None:
-            return f"{self.alias} = {{ {str(self.state)} }}"
+            return f"{self.alias} = {{ {", ".join(self.state.value)} }}"
         elif self.alias is None and self.additional_info is None:
-            return f"{{ {str(self.state)} }}"
+            return f"{{ {", ".join(self.state.value)} }}"
 
     def __contains__(self, item: list[str] | State) -> bool:
         item_ = item
@@ -80,7 +93,7 @@ class Automate:
             self.__signals = signals
             if isinstance(states[0], TableState):
                 self.__states = states
-            elif isinstance(states[0], TableStateDict):
+            elif isinstance(states[0], dict) or isinstance(states[0], TableStateDict):
                 self.__states = [AutomateUtils.create_table_state_from_dict(_) for _ in states]
             self.__fill_clear_matrix()
         elif automate_dict is not None:
@@ -94,6 +107,26 @@ class Automate:
                         (state.alias, signal),
                         automate_dict["states"][self.__get_state_index_by_alias(state.alias)][self.__get_signal_index_by_name(signal)]
                     )
+
+    @property
+    def signals_count(self) -> int:
+        return len(self.__signals)
+
+    @property
+    def states_count(self) -> int:
+        return len(self.__states)
+
+    def get_states_alias(self) -> list[str]:
+        return [_.alias for _ in self.__states]
+
+    def get_signals_name(self) -> list[str]:
+        return self.__signals
+
+    def get_state_by_id(self, state_id: int) -> TableState:
+        return self.__states[state_id]
+
+    def get_signal_by_id(self, signal_id: int) -> str:
+        return self.__signals[signal_id]
 
     def __get_state_index_by_alias(self, item: str) -> int:
         index = 0
@@ -134,57 +167,63 @@ class Automate:
             if isinstance(value, State):
                 self.__matrix[self.__get_state_index_by_alias(item[0])][self.__get_signal_index_by_name(item[1])] = value
             else:
-                for state in self.__states:
-                    if state == item[0]:
-                        break
-                else:
-                    raise KeyError("Попытка присвоить несуществующее состоянии")
-                if item[1] not in self.__signals:
-                        raise KeyError("Попытка присвоить несуществующий сигнал")
-                for i in value:
-                    if i not in self.__state: # stop here
-                        raise KeyError("Попытка присвоить несуществующий сигнал")
-                self.__matrix[item[0]][item[1]] = Cell(item[0], item[1], value)
-        else:
-            raise KeyError("Неверный индекс")
+                self.__matrix[self.__get_state_index_by_alias(item[0])][self.__get_signal_index_by_name(item[1])] = State(set(value))
 
     def __str__(self) -> str:
         table = PrettyTable()
         table.field_names = [""] + self.__signals
-        for row in self.__matrix:
+        for item in self.__states:
             table.add_row(
-                [row] + self.__get_row_element(row)
+                [str(item)] + self.__get_row_element(item.alias)
             )
         return str(table)
 
-    def __get_row_element(self, index: str) -> list[str]:
-        return [", ".join(x) if (x := self.__matrix[index][_].value) != [] else "*" for _ in self.__matrix[index]]
+    def __get_row_element(self, alias: str) -> list[str]:
+        index_alias = self.__get_state_index_by_alias(alias)
+        return [str(_) for _ in self.__matrix[index_alias]]
 
-    def to_dict(self) -> dict[str, dict[str, list[str]]]:
-        d = {}
+    def to_dict(self) -> AutomateDict:
+        s = []
+
         for row in self.__matrix:
-            d[row] = {}
-            for column in self.__matrix[row]:
-                d[row][column] = self.__matrix[row][column].value
+            t = []
+            for column in row:
+                t.append(list(column.value))
+            s.append(t)
 
-        return d
+        return AutomateDict(
+            table_states=self.__get_table_states_to_dict(),
+            table_signals=self.__signals,
+            states=s
+        )
 
+    def __get_table_states_to_dict(self) -> list[TableStateDict]:
+        table_states = []
+        for i in self.__states:
+            table_states.append(TableStateDict(state=list(i.state.value), alias=i.alias, additional_info=i.additional_info))
+        return table_states
+
+    def get_all_states(self) -> list[str]:
+        states = set(self.get_states_alias())
+        for state in self.__states:
+            states |= state.state.value
+        return list(states)
+
+    def check_correct_states(self, states_check: list[str]) -> bool:
+        states = set(self.get_states_alias())
+        for state in self.__states:
+            states |= state.state.value
+        for state in states_check:
+            if state not in states:
+                return False
+        return True
+
+
+class AutomateUtils:
     @staticmethod
-    def dict_to_str_table(d: dict[str, dict[str, list[str]]]) -> str:
-
-        table = PrettyTable()
-        states = [_ for _ in d]
-        signals = [_ for _ in d[list(d.keys())[0]]]
-
-        table.field_names = [""] + signals
-
-        for state in states:
-            ag = [state] + [", ".join(x) if (x := d[state][_]) != [] else "*" for _ in d[state]]
-            table.add_row(
-                ag
-            )
-        return str(table)
-
-
-a =     {"q0": {"a": ["q1"], "b": ["q1"]}, "q1": {"a": ["q0"], "b": ["q1"]}}
-print(Automate.dict_to_str_table( a))
+    def create_table_state_from_dict(table_state_dict: TableStateDict) -> TableState:
+        return TableState(
+            state=State(set(table_state_dict["state"])),
+            alias=table_state_dict["alias"],
+            additional_info=table_state_dict["additional_info"]
+        )

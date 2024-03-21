@@ -19,6 +19,12 @@ class BaseMenu:
 
         return True
 
+    @staticmethod
+    def is_posix() -> bool:
+        if os.name == "posix":
+            return True
+        return False
+
     @property
     def correct_linux_terminal(self):
         if self.__correct_linux_terminal is None:
@@ -56,7 +62,6 @@ class BaseMenu:
             self.clear()
             return func(self, *args, **kwargs)
         return wrapper
-
 
     @staticmethod
     def clear() -> None:

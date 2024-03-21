@@ -1,5 +1,5 @@
 from TAFLCore.BaseSaver import BaseSaver
-
+from TAFLCore.Automate.Automate import AutomateDict
 
 class TAFL5Saver(BaseSaver):
 
@@ -31,3 +31,16 @@ class TAFL5Saver(BaseSaver):
     @BaseSaver.save_decorator
     def save_alphabet_graph(self, alphabet_graph: list[str]) -> None:
         self._data["alphabet_graph"] = alphabet_graph
+
+    @BaseSaver.load_decorator
+    def load_input_automate(self) -> AutomateDict:
+        return self._data["input_automate"]
+
+    @BaseSaver.save_decorator
+    def save_input_automate(self, input_automate: AutomateDict) -> None:
+        self._data["input_automate"] = input_automate
+
+    def save_all(self, alphabet_symbol: list[str], alphabet_graph: list[str], input_automate: AutomateDict) -> None:
+        self.save_alphabet_symbol(alphabet_symbol)
+        self.save_alphabet_graph(alphabet_graph)
+        self.save_input_automate(input_automate)

@@ -8,48 +8,42 @@ class TAFL5Menu(BaseMenu):
             self,
             previous_alphabet_symbol: list[str],
             previous_alphabet_graph: list[str],
-            previous_automate: dict[str, dict[str, list[str]]]
+            previous_automate: str
     ) -> int:
         print("Уже есть загруженные данные. Хотите использовать его?")
         print(f"Уже есть сохраненный алфавит входных символов '{' '.join(previous_alphabet_symbol)}'.")
         print(f"Уже есть сохраненный алфавит графа '{' '.join(previous_alphabet_graph)}.")
-        print(f"Начальный автомат: " + )
-
-
-
-    @BaseMenu.clear_wrapper
-    def new_load_alphabet_symbol_menu(self, previous_alphabet: list[str]) -> int | None:
-        print(f"Уже есть сохраненный алфавит входных символов '{' '.join(previous_alphabet)}'. Вы хотите использовать "
-              f"его?")
+        print(f"Начальный автомат: \n" + previous_automate )
         menu_choice = self.get_choose(
             [
                 "Да",
                 "Нет"
             ]
         )
-
         return menu_choice
 
     @BaseMenu.clear_wrapper
-    def new_load_alphabet_graph_menu(self, previous_alphabet: list[str]) -> int | None:
-        print(f"Уже есть сохраненный алфавит графа '{' '.join(previous_alphabet)}'. Вы хотите использовать "
-              f"его?")
+    def change_save_config_menu(self) -> int | None:
+        print("Изменить: ")
         menu_choice = self.get_choose(
             [
-                "Да",
-                "Нет"
+                "Алфавит входных символов",
+                "Алфавит графа",
+                "Начальный автомат"
+                "Не хочу ничего менять"
             ]
         )
 
         return menu_choice
 
     @BaseMenu.clear_wrapper
-    def change_alphabet_menu(self) -> int | None:
-        print("Изменение алфавита: ")
+    def change_init_configs_menu(self) -> int | None:
+        print("Изменить: ")
         menu_choice = self.get_choose(
             [
-                "Входных символов",
-                "Графа",
+                "Алфавит входных символов",
+                "Алфавит графа",
+                "Начальный автомат"
                 "Назад"
             ]
         )
@@ -61,7 +55,7 @@ class TAFL5Menu(BaseMenu):
         menu_choice = self.get_choose(
             [
                 "Бред",
-                "Изменить алфавиты",
+                "Изменить входные данные",
                 "Выход"
             ]
         )
