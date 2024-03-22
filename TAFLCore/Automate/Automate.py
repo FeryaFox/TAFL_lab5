@@ -7,6 +7,8 @@ class TableStateDict(TypedDict):
     state: list[str]
     alias: str
     additional_info: str | None
+    is_start: bool
+    is_end: bool
 
 
 class AutomateDict(TypedDict):
@@ -20,7 +22,7 @@ class State:
     value: set[str]
 
     def __str__(self) -> str:
-        if len(self.value) == 0:
+        if len(self.value) == 0 or (len(self.value) == 1 and str(next(iter(self.value))) == ""):
             return "Ø"
         return f"{", ".join(self.value)}"
 
@@ -43,15 +45,27 @@ class TableState:
     alias: str
     additional_info: str | None = None
 
+    is_start: bool = False
+    is_end: bool = False
+
     def __str__(self) -> str:
+
+        a = ""
+
         if self.alias is not None and self.additional_info is not None:
-            return f"{self.alias} = {self.additional_info} = {{ {", ".join(self.state.value)} }}"
+            a += f"{self.alias} = {self.additional_info} = {{ {", ".join(self.state.value)} }}"
         elif self.alias is None and self.additional_info is not None:
-            return f"{self.additional_info} = {{ {", ".join(self.state.value)} }}"
+            a += f"{self.additional_info} = {{ {", ".join(self.state.value)} }}"
         elif self.alias is not None and self.additional_info is None:
-            return f"{self.alias} = {{ {", ".join(self.state.value)} }}"
+            a += f"{self.alias} = {{ {", ".join(self.state.value)} }}"
         elif self.alias is None and self.additional_info is None:
-            return f"{{ {", ".join(self.state.value)} }}"
+            a += f"{{ {", ".join(self.state.value)} }}"
+        if self.is_end:
+            a = "[ " + a + " ]"
+        if self.is_start:
+            a = "-> " + a
+
+        return a
 
     def __contains__(self, item: list[str] | State) -> bool:
         item_ = item
@@ -89,6 +103,7 @@ class Automate:
             signals: list[str] | None = None,
             automate_dict: AutomateDict | None = None
     ) -> None:
+        self.__matrix = []
         if states is not None and signals is not None:
             self.__signals = signals
             if isinstance(states[0], TableState):
@@ -146,7 +161,7 @@ class Automate:
         for state in self.__states:
             row = []
             for signal in self.__signals:
-                row.append(State(set([])))
+                row.append(State({""}))
             self.__matrix.append(row)
 
     def __getitem__(self, item: str | tuple[str, str]) -> AutomateRow | State:
@@ -172,13 +187,15 @@ class Automate:
     def __str__(self) -> str:
         table = PrettyTable()
         table.field_names = [""] + self.__signals
+        # print(self.__signals)
         for item in self.__states:
+            # print(self.__get_row_elements(item.alias))
             table.add_row(
-                [str(item)] + self.__get_row_element(item.alias)
+                [str(item)] + self.__get_row_elements(item.alias)
             )
         return str(table)
 
-    def __get_row_element(self, alias: str) -> list[str]:
+    def __get_row_elements(self, alias: str) -> list[str]:
         index_alias = self.__get_state_index_by_alias(alias)
         return [str(_) for _ in self.__matrix[index_alias]]
 
@@ -200,7 +217,13 @@ class Automate:
     def __get_table_states_to_dict(self) -> list[TableStateDict]:
         table_states = []
         for i in self.__states:
-            table_states.append(TableStateDict(state=list(i.state.value), alias=i.alias, additional_info=i.additional_info))
+            table_states.append(TableStateDict(
+                state=list(i.state.value),
+                alias=i.alias,
+                additional_info=i.additional_info,
+                is_start=i.is_start,
+                is_end=i.is_end
+            ))
         return table_states
 
     def get_all_states(self) -> list[str]:
@@ -218,6 +241,31 @@ class Automate:
                 return False
         return True
 
+    def check_is_all_states_in(self, states_check: list[str]) -> bool:
+        states = set(self.get_all_states())
+        for state_check in states_check:
+            if state_check not in states:
+                return False
+        return True
+
+    def check_is_all_signals_in(self, signals_check: list[str]) -> bool:
+        for signal_check in self.__signals:
+            if signal_check not in signals_check:
+                return False
+        return True
+
+    def set_start_state_by_alias(self, aliases: list[str]) -> None:
+        for i in aliases:
+            for j in self.__states:
+                if i == j.alias:
+                    j.is_start = True
+
+    def set_end_state_by_alias(self, aliases: list[str]) -> None:
+        for i in aliases:
+            for j in self.__states:
+                if i == j.alias:
+                    j.is_end = True
+
 
 class AutomateUtils:
     @staticmethod
@@ -225,5 +273,7 @@ class AutomateUtils:
         return TableState(
             state=State(set(table_state_dict["state"])),
             alias=table_state_dict["alias"],
-            additional_info=table_state_dict["additional_info"]
+            additional_info=table_state_dict["additional_info"],
+            is_start=table_state_dict["is_start"],
+            is_end=table_state_dict["is_end"]
         )

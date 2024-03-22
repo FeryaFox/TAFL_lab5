@@ -18,22 +18,27 @@ def main():
     input_automate = None
 
     if data_load == {}:
-        alphabet_symbol = inputer.load_alphabet_symbol()
-        alphabet_graph = inputer.load_alphabet_graph()
+        alphabet_symbol = inputer.get_alphabet_symbol()
+        alphabet_graph = inputer.get_alphabet_graph()
         states = []
         for i in alphabet_graph:
             states.append(
                 {
                     "state": [i],
                     "alias": i,
-                    "additional_info": None
+                    "additional_info": None,
+                    "is_start": False,
+                    "is_end": False
                 }
             )
         input_automate = Automate(states=states, signals=alphabet_symbol)
-        input_automate = inputer.load_input_automate(input_automate)
+        input_automate = inputer.get_input_automate(input_automate)
+
+        input_automate = inputer.get_started_states(input_automate)
+        input_automate = inputer.get_ended_states(input_automate)
+
         saver.save_all(alphabet_symbol, alphabet_graph, input_automate.to_dict())
     else:
-
         alphabet_symbol = saver.load_alphabet_symbol()
         alphabet_graph = saver.load_alphabet_graph()
         input_automate = Automate(automate_dict=saver.load_input_automate())
@@ -44,33 +49,41 @@ def main():
             str(input_automate)
         )
         match c:
-            case 1:
+            case 0:
                 ...
-            case 2:
-                while True:
-                    cc = menu.change_save_config_menu()
-                    match cc:
-                        case 1:
-                            alphabet_symbol_ = inputer.load_alphabet_symbol()
-                            if alphabet_symbol_ is None:
-                                continue
-                            alphabet_symbol = alphabet_symbol_
-                        case 2:
-                            alphabet_graph_ = inputer.load_alphabet_graph()
-                            if alphabet_graph_ is None:
-                                continue
-                            alphabet_graph = alphabet_graph_
-                        case 3:
-                            input_automate = inputer.load_input_automate(input_automate)
-                        case 4:
-                            saver.save_all(alphabet_symbol, alphabet_graph, input_automate.to_dict())
-                            break
+            case 1:
+                alphabet_symbol_ = inputer.get_alphabet_symbol()
+                if alphabet_symbol_ is None:
+                    ...
+                else:
+                    alphabet_symbol = alphabet_symbol_
+                alphabet_graph_ = inputer.get_alphabet_graph()
+                if alphabet_graph_ is None:
+                    ...
+                else:
+                    alphabet_graph = alphabet_graph_
+                states = []
+                for i in alphabet_graph:
+                    states.append(
+                        {
+                            "state": [i],
+                            "alias": i,
+                            "additional_info": None
+                        }
+                    )
+                a = Automate(states=states, signals=alphabet_symbol)
+                print(a)
+                input_automate = inputer.get_input_automate(Automate(states=states, signals=alphabet_symbol), is_change_alphabet=True)
+                saver.save_all(alphabet_symbol, alphabet_graph, input_automate.to_dict())
+
 
     while True:
         c = menu.main_menu()
         match c:
-            case 3:
-                print(c)
+            case 0:
+                print(input_automate)
+                input()
+            case 2:
                 exit()
 
     # TAFL5 = TAFL5()

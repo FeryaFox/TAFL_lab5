@@ -1,23 +1,33 @@
 import os
 
 
+def check_is_correct_linux_terminal_environment() -> bool:
+    if os.name != "posix" or "PYCHARM_HOSTED" in os.environ or "TERM" not in os.environ or os.environ["TERM"] == "":
+        return False
+
+    try:
+        import simple_term_menu
+    except ModuleNotFoundError:
+        return False
+
+    return True
+
+
+correct_linux_terminal = check_is_correct_linux_terminal_environment()
+
+if correct_linux_terminal:
+    from simple_term_menu import TerminalMenu
+
+
 class BaseMenu:
     __correct_linux_terminal: bool = None
 
     def __init__(self):
-        self.check_is_correct_linux_terminal_environment()
+        self.__correct_linux_terminal = self.check_is_correct_linux_terminal_environment()
 
     @staticmethod
     def check_is_correct_linux_terminal_environment() -> bool:
-        if os.name != "posix" or "PYCHARM_HOSTED" in os.environ or "TERM" not in os.environ or os.environ["TERM"] == "":
-            return False
-
-        try:
-            from simple_term_menu import TerminalMenu
-        except ModuleNotFoundError:
-            return False
-
-        return True
+        return check_is_correct_linux_terminal_environment()
 
     @staticmethod
     def is_posix() -> bool:
@@ -67,6 +77,7 @@ class BaseMenu:
     def clear() -> None:
         if not ("TERM" not in os.environ or os.environ["TERM"] == "") and os.name == "posix":
             # Когда запущено в линуксаих в нормальном терминале
+            ...
             os.system('cls' if os.name == 'nt' else 'clear')
         elif os.name == "posix" or "PYCHARM_HOSTED" in os.environ:
             # когда запущено в pycharm
