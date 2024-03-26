@@ -50,22 +50,22 @@ class TableState:
 
     def __str__(self) -> str:
 
-        a = ""
+        string_automate = ""
 
         if self.alias is not None and self.additional_info is not None:
-            a += f"{self.alias} = {self.additional_info} = {{ {", ".join(self.state.value)} }}"
+            string_automate += f"{self.alias} = {self.additional_info} = {{ {", ".join(self.state.value)} }}"
         elif self.alias is None and self.additional_info is not None:
-            a += f"{self.additional_info} = {{ {", ".join(self.state.value)} }}"
+            string_automate += f"{self.additional_info} = {{ {", ".join(self.state.value)} }}"
         elif self.alias is not None and self.additional_info is None:
-            a += f"{self.alias} = {{ {", ".join(self.state.value)} }}"
+            string_automate += f"{self.alias} = {{ {", ".join(self.state.value)} }}"
         elif self.alias is None and self.additional_info is None:
-            a += f"{{ {", ".join(self.state.value)} }}"
+            string_automate += f"{{ {", ".join(self.state.value)} }}"
         if self.is_end:
-            a = "[ " + a + " ]"
+            string_automate = "[ " + string_automate + " ]"
         if self.is_start:
-            a = "-> " + a
+            string_automate = "-> " + string_automate
 
-        return a
+        return string_automate
 
     def __contains__(self, item: list[str] | State) -> bool:
         item_ = item
@@ -164,9 +164,19 @@ class Automate:
                 row.append(State({""}))
             self.__matrix.append(row)
 
+    def __get_state_id_by_alias(self, alias: str) -> int:
+        i = 0
+        for state in self.__states:
+            if state.alias == alias:
+                return i
+            i += 1
+
+    def __get_signal_id_by_name(self, name: str) -> int:
+        return self.__signals.index(name)
+
     def __getitem__(self, item: str | tuple[str, str]) -> AutomateRow | State:
         if isinstance(item, tuple) and len(item) == 2:
-            return self.__matrix[item[0]][item[1]]
+            return self.__matrix[self.__get_state_id_by_alias(item[0])][self.__get_signal_id_by_name(item[1])]
         elif isinstance(item, str):
             c_state_alias = self.__get_state_index_by_alias(item[0])
             return AutomateRow(
@@ -265,6 +275,24 @@ class Automate:
             for j in self.__states:
                 if i == j.alias:
                     j.is_end = True
+
+    def add_state_row(self, state: TableState) -> None:
+        self.__states.append(state)
+        self.__matrix.append([State({""}) for _ in self.__signals])
+
+    def get_table_state_by_alias(self, alias: str) -> TableState:
+        i = 0
+        for state in self.__states:
+            if state.alias == alias:
+                return self.__states[i]
+            i += 1
+
+    def get_started_table_state_aliases(self) -> list[str]:
+        r = []
+        for i in self.__states:
+            if i.is_start:
+                r.append(i.alias)
+        return r
 
 
 class AutomateUtils:

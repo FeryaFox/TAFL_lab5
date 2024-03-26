@@ -2,10 +2,11 @@ from TAFL5.TAFL5Saver import TAFL5Saver
 from TAFL5.TAFL5 import TAFL5
 from TAFL5.TAFL5Inputer import TAFL5Inputer
 from TAFL5.TAFL5Menu import TAFL5Menu
-from TAFLCore.Automate import Automate
+from TAFLCore.Automate import Automate, AutomateUtils
 
 
 def main():
+    tafl5 = TAFL5()
 
     saver = TAFL5Saver()
     menu = TAFL5Menu()
@@ -81,8 +82,17 @@ def main():
         c = menu.main_menu()
         match c:
             case 0:
+                # input_automate.add_state(AutomateUtils.create_table_state_from_dict({"state": ["q4"], "alias": "q4", "additional_info": None, "is_start": True, "is_end": False}))
                 print(input_automate)
                 input()
+            case 1:
+                print("ε-замыкания:")
+                e_closures = tafl5.construct_e_closures(input_automate)
+                for i in e_closures:
+                    print(i)
+                print()
+                print("Отобразить таблицу переходов автомата")
+                tafl5.get_automaton_transition_table(input_automate, e_closures)
             case 2:
                 exit()
 

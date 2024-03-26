@@ -54,6 +54,7 @@ class TAFL5Menu(BaseMenu):
         menu_choice = self.get_choose(
             [
                 "Показать автомат",
+                "Основное задание",
                 "Изменить входные данные",
                 "Выход"
             ]
