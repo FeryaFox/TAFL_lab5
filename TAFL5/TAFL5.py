@@ -51,21 +51,26 @@ def transform_deltas(input_list):
 
     return result_list
 
+
 def filter_signals_states(transformed_list):
     # Удаление словарей, где все сигналы равны 'e'
     new_list = [d for d in transformed_list if not all(signal == 'e' for signal in d['signals'])]
 
     # Удаление состояний, соответствующих 'e', если после них есть другие сигналы
     for d in new_list:
-        if 'e' in d['signals']:
-            e_indices = [i for i, signal in enumerate(d['signals']) if signal == 'e']
-            # Пропускаем последний индекс, если 'e' - это последний сигнал
-            e_indices = [i for i in e_indices if i < len(d['signals']) - 1]
-            # Удаляем состояния на этих индексах
-            for index in sorted(e_indices, reverse=True):
-                del d['states'][index]
-                del d['signals'][index]
+        e_indices = []
+        for i, signal in enumerate(d['signals']):
+            if signal == 'e':
+                # Если 'e' не последний сигнал или за 'e' следуют не только сигналы 'e'
+                if i < len(d['signals']) - 1 and not all(s == 'e' for s in d['signals'][i + 1:]):
+                    e_indices.append(i)
+
+        for index in sorted(e_indices, reverse=True):
+            del d['states'][index]
+            del d['signals'][index]
+
     return new_list
+
 
 # Объединение состояний и удаление дубликатов
 def combine_unique_states(filtered_list):
@@ -122,6 +127,7 @@ class TAFL5:
     @staticmethod
     def get_automaton_transition_table(automate: Automate, e_closures: list[TableState]) -> Automate:
 
+
         signals_name = automate.get_signals_name().copy()
         signals_name.remove("e")
         transition_automate = Automate(e_closures, signals_name)
@@ -135,7 +141,7 @@ class TAFL5:
                 s_states = []
                 for state in e_closure.state.value:
 
-                    # print(f"({state}, {signal} -> ", end="")
+                    # print(f"({state}, {signal}) -> ", end="")
                     r = []
                     transformed_list = get_deltas(state, signal, r, automate, False)
 
