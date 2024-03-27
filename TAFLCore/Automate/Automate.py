@@ -164,25 +164,15 @@ class Automate:
                 row.append(State({""}))
             self.__matrix.append(row)
 
-    def __get_state_id_by_alias(self, alias: str) -> int:
-        i = 0
-        for state in self.__states:
-            if state.alias == alias:
-                return i
-            i += 1
-
-    def __get_signal_id_by_name(self, name: str) -> int:
-        return self.__signals.index(name)
-
     def __getitem__(self, item: str | tuple[str, str]) -> AutomateRow | State:
         if isinstance(item, tuple) and len(item) == 2:
-            return self.__matrix[self.__get_state_id_by_alias(item[0])][self.__get_signal_id_by_name(item[1])]
+            return self.__matrix[self.__get_state_index_by_alias(item[0])][self.__get_signal_index_by_name(item[1])]
         elif isinstance(item, str):
-            c_state_alias = self.__get_state_index_by_alias(item[0])
+            c_state_alias = self.__get_state_index_by_alias(item)
             return AutomateRow(
                 self.__states[c_state_alias],
                 self.__signals,
-                self.__matrix[self.__get_state_index_by_alias(item[0])]
+                self.__matrix[self.__get_state_index_by_alias(item)]
             )
         else:
             raise KeyError("Неверный индекс")

@@ -86,14 +86,17 @@ def main():
                 print(input_automate)
                 input()
             case 1:
+                print(input_automate)
                 print("ε-замыкания:")
                 e_closures = tafl5.construct_e_closures(input_automate)
                 for i in e_closures:
                     print(i)
                 print()
                 print("Отобразить таблицу переходов автомата")
-                tafl5.get_automaton_transition_table(input_automate, e_closures)
-            case 2:
+                a = tafl5.get_automaton_transition_table(input_automate, e_closures)
+                print(a)
+                input()
+            case 3:
                 exit()
 
     # TAFL5 = TAFL5()
