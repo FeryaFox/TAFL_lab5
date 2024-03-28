@@ -71,7 +71,9 @@ def main():
                         {
                             "state": [i],
                             "alias": i,
-                            "additional_info": None
+                            "additional_info": None,
+                            "is_start": False,
+                            "is_end": False
                         }
                     )
                 a = Automate(states=states, signals=alphabet_symbol)
@@ -99,6 +101,7 @@ def main():
                 automaton_transition = tafl5.get_automaton_transition_table(input_automate, e_closures)
                 print(automaton_transition)
                 deparmenize_automate = tafl5.deparmenize_automate(automaton_transition)
+                print("Детерменизированный автомат")
                 print(deparmenize_automate)
                 input()
             case 2:

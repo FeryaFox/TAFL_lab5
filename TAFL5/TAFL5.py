@@ -182,7 +182,7 @@ class TAFL5:
         checked_index = 0
         add_index = 1
         # Пребираем, пока все не пройдет
-        while checked_index < len(undeparmenize_automate.get_states_alias()) - 1:
+        while checked_index < deparmenized_automate_.states_count:
             current_state = deparmenized_automate_.get_all_table_states_obj()[checked_index] # получаем текущее состояение из таблицы P
             for signal in deparmenized_automate_.get_signals_name():
                 d_final = [] # состояния S
