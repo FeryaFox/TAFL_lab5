@@ -92,3 +92,13 @@ class TAFL5Inputer(BaseInputer):
             BaseMenu.clear()
             break
         return automate
+
+    @staticmethod
+    def get_word_to_validate(automate: Automate) -> str:
+        while True:
+            word = input("Введите слово для проверки: ")
+            for i in automate.get_signals_name():
+                for j in word:
+                    if j not in i:
+                        continue
+            return word

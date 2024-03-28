@@ -17,6 +17,8 @@ def main():
     alphabet_symbol = []
     alphabet_graph = []
     input_automate = None
+    automaton_transition = None
+    deparmenize_automate = None
 
     if data_load == {}:
         alphabet_symbol = inputer.get_alphabet_symbol()
@@ -82,7 +84,8 @@ def main():
         c = menu.main_menu()
         match c:
             case 0:
-                # input_automate.add_state(AutomateUtils.create_table_state_from_dict({"state": ["q4"], "alias": "q4", "additional_info": None, "is_start": True, "is_end": False}))
+                print(f"Алфавит входных символов: {alphabet_symbol}")
+                print(f"Алфавит автомата: {alphabet_graph}")
                 print(input_automate)
                 input()
             case 1:
@@ -93,14 +96,47 @@ def main():
                     print(i)
                 print()
                 print("Отобразить таблицу переходов автомата")
-                a = tafl5.get_automaton_transition_table(input_automate, e_closures)
-                print(a)
+                automaton_transition = tafl5.get_automaton_transition_table(input_automate, e_closures)
+                print(automaton_transition)
+                deparmenize_automate = tafl5.deparmenize_automate(automaton_transition)
+                print(deparmenize_automate)
+                input()
+            case 2:
+                if deparmenize_automate is None:
+                    print("Запустите сначала основное задание ")
+                    input()
+                    continue
+                print(deparmenize_automate)
+                word = inputer.get_word_to_validate(deparmenize_automate)
+                if tafl5.check_is_valid_word(word, deparmenize_automate):
+                    print(f"Автомат допускает слово: {word}")
+                else:
+                    print(f"Автомат не допускает слово: {word}")
                 input()
             case 3:
+                alphabet_symbol = inputer.get_alphabet_symbol()
+                alphabet_graph = inputer.get_alphabet_graph()
+                states = []
+                for i in alphabet_graph:
+                    states.append(
+                        {
+                            "state": [i],
+                            "alias": i,
+                            "additional_info": None,
+                            "is_start": False,
+                            "is_end": False
+                        }
+                    )
+
+                input_automate = Automate(states=states, signals=alphabet_symbol)
+                input_automate = inputer.get_input_automate(input_automate)
+
+                input_automate = inputer.get_started_states(input_automate)
+                input_automate = inputer.get_ended_states(input_automate)
+
+                saver.save_all(alphabet_symbol, alphabet_graph, input_automate.to_dict())
+            case 4:
                 exit()
-
-    # TAFL5 = TAFL5()
-
 
 if __name__ == "__main__":
     main()

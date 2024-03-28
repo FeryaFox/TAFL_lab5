@@ -1,7 +1,7 @@
 from .TAFL5Saver import TAFL5Saver
 from TAFLCore.Automate import Automate, TableState, AutomateUtils
 from typing import TypedDict
-
+from .utils import *
 
 def get_deltas(state: str, signal: str, result: list, automate: Automate, is_signal: bool) -> list:
     if (r := list(automate[state][signal].value)) and not is_signal:
@@ -89,16 +89,16 @@ class TAFL5:
 
         for alias in started_table_states_aliases:
             achievable_started_table_states_aliases.append(alias)
-            if (i := automate[alias, "e"].value) is not None:
-                achievable_started_table_states_aliases += i
+            transitions = automate[alias, "e"].value  # Получаем список переходов для данного алиаса
+            if transitions:
+                achievable_started_table_states_aliases.extend(transitions)  # Добавляем все переходы в итоговый список
 
         achievable_started_table_states_aliases = sorted(achievable_started_table_states_aliases)
 
         for alias in automate.get_states_alias():
-
             states = list(([alias] + list(automate[alias, "e"].value)))
             states.sort()
-
+            print(states)
             is_start = False
             is_end = False
 
@@ -106,9 +106,10 @@ class TAFL5:
                 if i in states:
                     is_start = True
 
-            for i in automate.get_states_alias():
-                if len(states) == 1 and states[0] == i and automate.get_table_state_by_alias(i).is_end:
+            for state in states:
+                if automate.get_table_state_by_alias(state).is_end:
                     is_end = True
+                    break
 
             e_closures.append(
                 AutomateUtils.create_table_state_from_dict(
@@ -161,3 +162,68 @@ class TAFL5:
                 transition_automate[e_closure.alias, signal].value = s_states
 
         return transition_automate
+
+    @staticmethod
+    def deparmenize_automate(undeparmenize_automate: Automate) -> Automate:
+        started_states = undeparmenize_automate.get_started_table_state_aliases()
+
+        tt = [AutomateUtils.create_table_state_from_dict(
+            {
+                "state": started_states,
+                "alias": "P0",
+                "additional_info": None,
+                "is_start": True,
+                "is_end": False
+            }
+        )]
+
+        deparmenized_automate_ = Automate(tt, undeparmenize_automate.get_signals_name().copy())
+
+        checked_index = 0
+        add_index = 1
+        # Пребираем, пока все не пройдет
+        while checked_index < len(undeparmenize_automate.get_states_alias()) - 1:
+            current_state = deparmenized_automate_.get_all_table_states_obj()[checked_index] # получаем текущее состояение из таблицы P
+            for signal in deparmenized_automate_.get_signals_name():
+                d_final = [] # состояния S
+                for i in current_state.state.value:
+                    d_final += undeparmenize_automate[i, signal].value
+
+                d_final = set(d_final)
+                is_add = False
+                if d_final == set():
+                    continue
+                for i in deparmenized_automate_.get_all_table_states_obj():
+                    if d_final == i.state.value:
+                        deparmenized_automate_[current_state.alias, signal].value = {i.alias}
+                        is_add = True
+                        break
+                if not is_add:
+                    deparmenized_automate_.add_state_row(AutomateUtils.create_table_state_from_dict(
+                        {
+                            "state": list(d_final),
+                            "alias": f"P{add_index}",
+                            "additional_info": None,
+                            "is_start": False,
+                            "is_end": False
+                        }
+                    ))
+                    deparmenized_automate_[current_state.alias, signal].value = {f"P{add_index}"}
+                    add_index += 1
+            checked_index += 1
+
+        for table_state in deparmenized_automate_.get_all_table_states_obj():
+            for state in table_state.state.value:
+                if undeparmenize_automate.is_table_state_ended_by_alias(state):
+                    table_state.is_end = True
+
+        return deparmenized_automate_
+
+    @staticmethod
+    def check_is_valid_word(word: str, automate: Automate):
+        next_state = "P0"
+        for i in word:
+            next_state = list(automate[next_state, i].value)[0]
+            if next_state == "":
+                return False
+        return True

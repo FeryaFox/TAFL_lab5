@@ -232,6 +232,9 @@ class Automate:
             states |= state.state.value
         return list(states)
 
+    def get_all_table_states_obj(self) -> list[TableState]:
+        return self.__states
+
     def check_correct_states(self, states_check: list[str]) -> bool:
         states = set(self.get_states_alias())
         for state in self.__states:
@@ -283,6 +286,11 @@ class Automate:
             if i.is_start:
                 r.append(i.alias)
         return r
+
+    def is_table_state_ended_by_alias(self, alias: str) -> bool:
+        for state in self.__states:
+            if state.alias == alias:
+                return state.is_end
 
 
 class AutomateUtils:
