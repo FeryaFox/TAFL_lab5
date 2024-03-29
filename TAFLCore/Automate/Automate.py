@@ -73,6 +73,16 @@ class TableState:
             item_ = item.value
         return self.state.value.issubset(set(item_))
 
+    def to_string_ignore_is_start_or_end(self) -> str:
+        if self.alias is not None and self.additional_info is not None:
+            return f"{self.alias} = {self.additional_info} = {{ {", ".join(self.state.value)} }}"
+        elif self.alias is None and self.additional_info is not None:
+            return f"{self.additional_info} = {{ {", ".join(self.state.value)} }}"
+        elif self.alias is not None and self.additional_info is None:
+            return f"{self.alias} = {{ {", ".join(self.state.value)} }}"
+        elif self.alias is None and self.additional_info is None:
+            return f"{{ {", ".join(self.state.value)} }}"
+
 
 @dataclass
 class AutomateRow:

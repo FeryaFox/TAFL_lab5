@@ -98,7 +98,6 @@ class TAFL5:
         for alias in automate.get_states_alias():
             states = list(([alias] + list(automate[alias, "e"].value)))
             states.sort()
-            print(states)
             is_start = False
             is_end = False
 
@@ -127,8 +126,6 @@ class TAFL5:
 
     @staticmethod
     def get_automaton_transition_table(automate: Automate, e_closures: list[TableState]) -> Automate:
-
-
         signals_name = automate.get_signals_name().copy()
         signals_name.remove("e")
         transition_automate = Automate(e_closures, signals_name)

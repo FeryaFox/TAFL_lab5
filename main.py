@@ -81,7 +81,6 @@ def main():
                 input_automate = inputer.get_input_automate(Automate(states=states, signals=alphabet_symbol), is_change_alphabet=True)
                 saver.save_all(alphabet_symbol, alphabet_graph, input_automate.to_dict())
 
-
     while True:
         c = menu.main_menu()
         match c:
@@ -95,7 +94,7 @@ def main():
                 print("ε-замыкания:")
                 e_closures = tafl5.construct_e_closures(input_automate)
                 for i in e_closures:
-                    print(i)
+                    print(i.to_string_ignore_is_start_or_end())
                 print()
                 print("Отобразить таблицу переходов автомата")
                 automaton_transition = tafl5.get_automaton_transition_table(input_automate, e_closures)
