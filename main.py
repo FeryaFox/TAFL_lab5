@@ -42,6 +42,8 @@ def main():
         input_automate = inputer.get_ended_states(input_automate)
 
         saver.save_all(alphabet_symbol, alphabet_graph, input_automate.to_dict())
+        print(input_automate)
+        input()
     else:
         alphabet_symbol = saver.load_alphabet_symbol()
         alphabet_graph = saver.load_alphabet_graph()
@@ -77,14 +79,20 @@ def main():
                             "is_end": False
                         }
                     )
-                a = Automate(states=states, signals=alphabet_symbol)
-                print(a)
-                input_automate = inputer.get_input_automate(Automate(states=states, signals=alphabet_symbol), is_change_alphabet=True)
+
+                input_automate = inputer.get_input_automate(
+                    Automate(
+                        states=states,
+                        signals=alphabet_symbol
+                    ),
+                    is_change_alphabet=True
+                )
 
                 input_automate = inputer.get_started_states(input_automate)
                 input_automate = inputer.get_ended_states(input_automate)
-
                 saver.save_all(alphabet_symbol, alphabet_graph, input_automate.to_dict())
+                print(input_automate)
+                input()
 
     while True:
         c = menu.main_menu()

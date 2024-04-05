@@ -21,6 +21,7 @@ class StateDict(TypedDict):
     state_alias: str
     signal_name: str
 
+
 @dataclass
 class State:
     value: set[str]
@@ -78,14 +79,15 @@ class TableState:
         return self.state.value.issubset(set(item_))
 
     def to_string_ignore_is_start_or_end(self) -> str:
+
         if self.alias is not None and self.additional_info is not None:
-            return f"{self.alias} = {self.additional_info} = {{ {", ".join(self.state.value)} }}"
+            return f"{self.alias} = {self.additional_info} = {{ {str(self.state)} }}"
         elif self.alias is None and self.additional_info is not None:
-            return f"{self.additional_info} = {{ {", ".join(self.state.value)} }}"
+            return f"{self.additional_info} = {{ {str(self.state)} }}"
         elif self.alias is not None and self.additional_info is None:
-            return f"{self.alias} = {{ {", ".join(self.state.value)} }}"
+            return f"{self.alias} = {{ {str(self.state) } }}"
         elif self.alias is None and self.additional_info is None:
-            return f"{{ {", ".join(self.state.value)} }}"
+            return f"{{ {str(self.state)} }}"
 
 
 @dataclass

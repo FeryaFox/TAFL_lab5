@@ -140,18 +140,12 @@ class TAFL5:
                 s_states = []
                 for state in e_closure.state.value:
 
-                    # print(f"({state}, {signal}) -> ", end="")
                     r = []
                     transformed_list = get_deltas(state, signal, r, automate, False)
 
                     transformed_list = transform_deltas(transformed_list)
-                    # print(transformed_list)
                     filtered_list = filter_signals_states(transformed_list)
                     e_states += combine_unique_states(filtered_list)
-                    # print(set(e_states))
-                    # print()
-
-                    # print("-"*100)
                 e_states = set(e_states)
                 for state in transition_automate.get_states_alias():
                     if e_states in transition_automate.get_table_state_by_alias(state):
