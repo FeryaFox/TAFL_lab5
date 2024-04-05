@@ -96,10 +96,16 @@ class TAFL5Inputer(BaseInputer):
 
     @staticmethod
     def get_word_to_validate(automate: Automate) -> str:
+        signals_name = automate.get_signals_name()
         while True:
-            word = input("Введите слово для проверки: ")
-            for i in automate.get_signals_name():
-                for j in word:
-                    if j not in i:
-                        continue
-            return word
+            correct = True
+            word = input("Введите слово для проверки: \n")
+            for j in word:
+                if j not in signals_name:
+                    print("Вы ввели элементы, которые нет в алфавите")
+                    correct = False
+                    break
+
+            if correct:
+                return word
+
