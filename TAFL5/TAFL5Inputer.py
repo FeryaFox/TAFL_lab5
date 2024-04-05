@@ -7,9 +7,10 @@ from threading import Thread
 
 class TAFL5Inputer(BaseInputer):
     def get_alphabet_symbol(self, previous: list[str] | None = None) -> list[str] | None:
-        input_phrase = "Введите пожалуйста алфавит входных символов через пробел(пример: 'a b c)(e заразервировано)': " \
+        BaseMenu.clear()
+        input_phrase = "Введите пожалуйста алфавит входных символов через пробел(пример: 'a b c)(e заразервировано)': \n" \
             if previous is None \
-            else f"Введите пожалуйста алфавит входных символов через пробел(пример: 'a b c')(e  заразервировано)(Предыдущий '{' '.join(previous)}'): "
+            else f"Введите пожалуйста алфавит входных символов через пробел(пример: 'a b c')(e  заразервировано)(Предыдущий '{' '.join(previous)}'): \n"
         while True:
             alphabet = self._input_alphabet(input_phrase)
             if "e" in alphabet:
@@ -18,9 +19,9 @@ class TAFL5Inputer(BaseInputer):
         return alphabet + ["e"]
 
     def get_alphabet_graph(self, previous: list[str] | None = None) -> list[str] | None:
-        input_phrase = "Введите пожалуйста алфавит графа через пробел(пример: 'qo q1 q2)': " \
+        input_phrase = "Введите пожалуйста алфавит графа через пробел(пример: 'q0 q1 q2)': \n" \
             if previous is None \
-            else f"Введите пожалуйста алфавит графа через пробел(пример: 'q0 q1 q2')(Предыдущий '{' '.join(previous)}'): "
+            else f"Введите пожалуйста алфавит графа через пробел(пример: 'q0 q1 q2')(Предыдущий '{' '.join(previous)}'): \n"
         return self._input_alphabet(input_phrase)
 
     @staticmethod
@@ -35,7 +36,7 @@ class TAFL5Inputer(BaseInputer):
 
                     try:
                         print(f"Допустимые состояния: {", ".join(automate.get_all_states())}")
-                        input_states = input(f"Введите состояния для ({state}, {signal})(через проблел)(например: 'q0 q1 q2')(или enter для задания пустого): ").split()
+                        input_states = input(f"Введите состояния для ({state}, {signal})(через проблел)(например: 'q0 q1 q2')(или enter для задания пустого): \n").split()
                     except KeyboardInterrupt:
                         return automate
 
@@ -53,10 +54,10 @@ class TAFL5Inputer(BaseInputer):
     @staticmethod
     def get_started_states(automate: Automate) -> Automate:
         BaseMenu.clear()
-
+        print(automate)
         while True:
             try:
-                input_states = input(f"Введие начальные вершины (наши состояния {', '.join(automate.get_states_alias())}) через пробел: ").split()
+                input_states = input(f"Введие начальные вершины (наши состояния {', '.join(automate.get_states_alias())}) через пробел: \n").split()
             except KeyboardInterrupt:
                 return automate
 
@@ -74,11 +75,11 @@ class TAFL5Inputer(BaseInputer):
     @staticmethod
     def get_ended_states(automate: Automate) -> Automate:
         BaseMenu.clear()
-
+        print(automate)
         while True:
             try:
                 input_states = input(
-                    f"Введие конечные вершины (наши состояния {', '.join(automate.get_states_alias())}) через пробел: ").split()
+                    f"Введие конечные вершины (наши состояния {', '.join(automate.get_states_alias())}) через пробел: \n").split()
             except KeyboardInterrupt:
                 return automate
 

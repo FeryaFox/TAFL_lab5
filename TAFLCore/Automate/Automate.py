@@ -24,7 +24,7 @@ class State:
     def __str__(self) -> str:
         if len(self.value) == 0 or (len(self.value) == 1 and str(next(iter(self.value))) == ""):
             return "Ø"
-        return f"{", ".join(self.value)}"
+        return f"{", ".join(sorted(self.value))}"
 
     def __contains__(self, item: list[str] | set[str] | str) -> bool:
         if isinstance(item, str):
@@ -51,15 +51,15 @@ class TableState:
     def __str__(self) -> str:
 
         string_automate = ""
-
+        states = ", ".join(sorted(self.state.value))
         if self.alias is not None and self.additional_info is not None:
-            string_automate += f"{self.alias} = {self.additional_info} = {{ {", ".join(self.state.value)} }}"
+            string_automate += f"{self.alias} = {self.additional_info} = {{ {states} }}"
         elif self.alias is None and self.additional_info is not None:
-            string_automate += f"{self.additional_info} = {{ {", ".join(self.state.value)} }}"
+            string_automate += f"{self.additional_info} = {{ {states} }}"
         elif self.alias is not None and self.additional_info is None:
-            string_automate += f"{self.alias} = {{ {", ".join(self.state.value)} }}"
+            string_automate += f"{self.alias} = {{ {states} }}"
         elif self.alias is None and self.additional_info is None:
-            string_automate += f"{{ {", ".join(self.state.value)} }}"
+            string_automate += f"{{ {states} }}"
         if self.is_end:
             string_automate = "[ " + string_automate + " ]"
         if self.is_start:
@@ -240,7 +240,7 @@ class Automate:
         states = set(self.get_states_alias())
         for state in self.__states:
             states |= state.state.value
-        return list(states)
+        return sorted(states)
 
     def get_all_table_states_obj(self) -> list[TableState]:
         return self.__states

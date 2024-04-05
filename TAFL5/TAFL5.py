@@ -3,6 +3,7 @@ from TAFLCore.Automate import Automate, TableState, AutomateUtils
 from typing import TypedDict
 from .utils import *
 
+
 def get_deltas(state: str, signal: str, result: list, automate: Automate, is_signal: bool) -> list:
     if (r := list(automate[state][signal].value)) and not is_signal:
         is_signal = True

@@ -35,9 +35,10 @@ def main():
                 }
             )
         input_automate = Automate(states=states, signals=alphabet_symbol)
-        input_automate = inputer.get_input_automate(input_automate)
 
+        input_automate = inputer.get_input_automate(input_automate)
         input_automate = inputer.get_started_states(input_automate)
+
         input_automate = inputer.get_ended_states(input_automate)
 
         saver.save_all(alphabet_symbol, alphabet_graph, input_automate.to_dict())
@@ -79,14 +80,18 @@ def main():
                 a = Automate(states=states, signals=alphabet_symbol)
                 print(a)
                 input_automate = inputer.get_input_automate(Automate(states=states, signals=alphabet_symbol), is_change_alphabet=True)
+
+                input_automate = inputer.get_started_states(input_automate)
+                input_automate = inputer.get_ended_states(input_automate)
+
                 saver.save_all(alphabet_symbol, alphabet_graph, input_automate.to_dict())
 
     while True:
         c = menu.main_menu()
         match c:
             case 0:
-                print(f"Алфавит входных символов: {alphabet_symbol}")
-                print(f"Алфавит автомата: {alphabet_graph}")
+                print(f"Алфавит входных символов: {", ".join(alphabet_symbol)}")
+                print(f"Алфавит автомата: {", ".join(alphabet_graph)}")
                 print(input_automate)
                 input()
             case 1:
@@ -96,7 +101,7 @@ def main():
                 for i in e_closures:
                     print(i.to_string_ignore_is_start_or_end())
                 print()
-                print("Отобразить таблицу переходов автомата")
+                print("Таблица переходов автомата")
                 automaton_transition = tafl5.get_automaton_transition_table(input_automate, e_closures)
                 print(automaton_transition)
                 deparmenize_automate = tafl5.deparmenize_automate(automaton_transition)
