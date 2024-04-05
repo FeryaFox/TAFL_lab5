@@ -215,7 +215,12 @@ class TAFL5:
     def check_is_valid_word(word: str, automate: Automate):
         next_state = "P0"
         for i in word:
+            prev_state = next_state
             next_state = list(automate[next_state, i].value)[0]
             if next_state == "":
                 return False
-        return True
+
+        if automate.get_table_state_by_alias(next_state).is_end:
+            return True
+        else:
+            return False
