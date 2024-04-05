@@ -17,6 +17,10 @@ class AutomateDict(TypedDict):
     states: list[list[list[str]]]
 
 
+class StateDict(TypedDict):
+    state_alias: str
+    signal_name: str
+
 @dataclass
 class State:
     value: set[str]
@@ -195,19 +199,27 @@ class Automate:
                 self.__matrix[self.__get_state_index_by_alias(item[0])][self.__get_signal_index_by_name(item[1])] = State(set(value))
 
     def __str__(self) -> str:
-        table = PrettyTable()
-        table.field_names = [""] + self.__signals
-        # print(self.__signals)
-        for item in self.__states:
-            # print(self.__get_row_elements(item.alias))
-            table.add_row(
-                [str(item)] + self.__get_row_elements(item.alias)
-            )
-        return str(table)
+        return self.to_string()
 
-    def __get_row_elements(self, alias: str) -> list[str]:
-        index_alias = self.__get_state_index_by_alias(alias)
-        return [str(_) for _ in self.__matrix[index_alias]]
+    def __get_row_elements(
+            self,
+            alias: str,
+            highlighted_states: list[StateDict] | None = None
+    ) -> list[str]:
+        row = []
+        if highlighted_states is not None:
+            for i in self.__signals:
+                for j in highlighted_states:
+                    if alias == j["state_alias"] and i == j["signal_name"]:
+                        row.append(f"( {str(self[alias, i])} )")
+                    else:
+                        row.append(f"{str(self[alias, i])}")
+        else:
+            for i in self.__signals:
+                row.append(f"{str(self[alias, i])}")
+
+        return row
+
 
     def to_dict(self) -> AutomateDict:
         s = []
@@ -302,6 +314,14 @@ class Automate:
             if state.alias == alias:
                 return state.is_end
 
+    def to_string(self, highlighted_states: list[StateDict] | None = None) -> str:
+        table = PrettyTable()
+        table.field_names = [""] + self.__signals
+        for item in self.__states:
+            table.add_row(
+                [str(item)] + self.__get_row_elements(item.alias, highlighted_states)
+            )
+        return str(table)
 
 class AutomateUtils:
     @staticmethod

@@ -31,7 +31,7 @@ class TAFL5Inputer(BaseInputer):
             print("Один из начальных алфавитов был заменен, поэтому надо заново задать автомат")
         for state in automate.get_states_alias():
             for signal in automate.get_signals_name():
-                print(automate)
+                print(automate.to_string([{"state_alias": state, "signal_name": signal}]))
                 while True:
 
                     try:
