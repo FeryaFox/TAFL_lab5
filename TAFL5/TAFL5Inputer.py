@@ -1,9 +1,6 @@
 from TAFLCore.BaseInputer import BaseInputer
 from TAFLCore.Automate import Automate
 from TAFLCore.BaseMenu import BaseMenu
-import curses
-from threading import Thread
-
 
 class TAFL5Inputer(BaseInputer):
     def get_alphabet_symbol(self, previous: list[str] | None = None) -> list[str] | None:
