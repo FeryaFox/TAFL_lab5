@@ -14,7 +14,7 @@
 
 Установка `pip install -r requirements.txt`
 
-Есть только необязательная зависимость `simple_term_menu` и служит только для красивого отображения меню. Работает только в Linux и только в терминале.
+Есть необязательная зависимость `simple_term_menu` и служит только для красивого отображения меню. Работает только в Linux и только в терминале.
 
 Если у вас другой случай, то будет работать более простое меню
 
@@ -63,7 +63,7 @@ This project fulfills the following points:
 
 Installing `pip install -r requirements.txt `
 
-There is only an optional dependency `simple_term_menu` and only serves to display the menu beautifully. It works only on Linux and only in the terminal.
+There is an optional dependency `simple_term_menu` and only serves to display the menu beautifully. It works only on Linux and only in the terminal.
 
 If you have a different case, then a simpler menu will work.
 
@@ -96,5 +96,3 @@ If you have a different case, then a simpler menu will work.
 ![img_2.png](img/img_2.png)
 
 ### Windows
-
-.
