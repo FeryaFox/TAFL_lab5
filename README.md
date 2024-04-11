@@ -32,6 +32,8 @@
 
 ### Windows
 
+![img.png](img/img_3.png)
+
 ## Основное задание
 
 ### Linux
@@ -40,6 +42,8 @@
 
 ### Windows
 
+![img_1.png](img/img_4.png)
+
 ## Проверка допустимого слова
 
 ### Linux
@@ -47,6 +51,8 @@
 ![img_2.png](img/img_2.png)
 
 ### Windows
+
+![img_2.png](img/img_5.png)
 
 # What kind of project (ENG)
 
@@ -81,6 +87,8 @@ If you have a different case, then a simpler menu will work.
 
 ### Windows
 
+![img.png](img/img_3.png)
+
 ## The main task
 
 ### Linux
@@ -89,6 +97,8 @@ If you have a different case, then a simpler menu will work.
 
 ### Windows
 
+![img_1.png](img/img_4.png)
+
 ## Valid word check
 
 ### Linux
@@ -96,3 +106,5 @@ If you have a different case, then a simpler menu will work.
 ![img_2.png](img/img_2.png)
 
 ### Windows
+
+![img_2.png](img/img_5.png)
