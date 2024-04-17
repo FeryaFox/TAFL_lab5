@@ -98,8 +98,8 @@ def main():
         c = menu.main_menu()
         match c:
             case 0:
-                print(f"Алфавит входных символов: {", ".join(alphabet_symbol)}")
-                print(f"Алфавит автомата: {", ".join(alphabet_graph)}")
+                print(f"Алфавит входных символов: {', '.join(alphabet_symbol)}")
+                print(f"Алфавит автомата: {', '.join(alphabet_graph)}")
                 print(input_automate)
                 input()
             case 1:
@@ -152,6 +152,7 @@ def main():
                 saver.save_all(alphabet_symbol, alphabet_graph, input_automate.to_dict())
             case 4:
                 exit()
+
 
 if __name__ == "__main__":
     main()
